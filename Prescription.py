@@ -4,7 +4,7 @@ import getpass #gets password without echoing
 
 class Prescription():
 
-    def __init(self):
+    def __init__(self):
         pass
 
     def main(self):
@@ -24,7 +24,7 @@ class Prescription():
 
         self.getInputs()
 
-        if self.checkConstraints():
+        if self.patientCanTakeTest() and self.labCanDoTest():
             self.executeStatement()
 
         
@@ -41,7 +41,7 @@ class Prescription():
         go=True
         self.printSeparator()
         
-        self.testname = self.getTestName()
+        self.testName = self.getTestName()
         
         
         go=True
@@ -167,15 +167,59 @@ class Prescription():
         print("-----------------------")
         print("")
         
-    
-    
-    def checkConstraints(self):
+
+    #checks if entered input doesn't violate database contraints. If input is
+    #invalid, prints an error message as to why.
+    def labCanDoTest(self):
+
+        #TODO: get self.labName, 
+        statement = 'select count(*) \
+                        from can_conduct c, test_type t \
+                        where t.type_id = c.test_id \
+                        and c.lab_name = ' + self.labName + ' \
+                        and t.test_name = ' + self.testName
+
+        curs = self.con.cursor()
+
+        curs.execute(statement)
+        canDoTest = curs.fetchAll()[0]
+
+        if canDoTest > 0:
+            #print error message
+            return True
+
+        return False
+
+    def patientCanTakeTest(self):
+
+        statement = 'select count(*) \
+                     from not_allowed na, test_type t, patient p \
+                     where t.type_id = na.test_id \
+                     and p.health_care_no = na.health_care_no \
+                     and p.name = ' + self.patient + ' \
+                     and t.test_name = ' + self.testName
+
+        curs = self.con.cursor()
+
+        curs.execute(statement)
+        cantTakeTest = curs.fetchAll()[0]
+
+        if cantTakeTest > 0:
+            #print error message
+            return False
+
         return True
+
+
+
+
+
+
+
+    
 
     def executeStatement(self):
         print(self.doctor)
 
 
 
-    #if __name__ == '__main__':
-    #    Prescription.run()
