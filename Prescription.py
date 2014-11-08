@@ -29,12 +29,25 @@ class Prescription():
 
         
     def getInputs(self):
+        go=True
+        
         self.printSeparator()
-        self.doctor = self.getDoctor()
+        
+        while go:
+            self.doctor,go = self.getDoctor()
+       
+       
+       
+        go=True
         self.printSeparator()
+        
         self.testname = self.getTestName()
+        
+        
+        go=True
         self.printSeparator()
-        self.patient = self.getPatient()
+        while go:
+            self.patient,go = self.getPatient()
         self.printSeparator()
  
         #self.patient= self.getPatient()
@@ -53,18 +66,41 @@ class Prescription():
         string = input('Enter Doctor name or number: ')
 
         if self.isNumber(string):
-            print("employee id is",int(string))
-            return int(string)
+            if self.goodNumber(string,"D"):
+                print("employee id is",int(string))
+                return int(string),False
+            else:
+                print("Invalid employee id")
+                return False,True
         else:
             return self.getDoctorNumber(string)
 
-    
+    def goodNumber(self,string,case):
+        if case == "D":
+            curs = self.con.cursor()
+            curs.execute("select * from doctor where employee_no like'"+string+"'")
+            rows = curs.fetchall()
+            if len(rows) == 0:
+                return False
+            else:
+                return True
+        else:
+            curs = self.con.cursor()
+            curs.execute("select * from patient where health_care_no like'"+string+"'")
+            rows = curs.fetchall()
+            if len(rows) == 0:
+                return False
+            else:
+                return True
+        
+        
+        
     def getDoctorNumber(self,string):
         
      
         curs = self.con.cursor()
 
-        curs.execute("select employee_no from doctor d,patient p where p.name like '%"+string+"%' and p.health_care_no=d.health_care_no")
+        curs.execute("select employee_no from doctor d,patient p where p.name like '"+string+"' and p.health_care_no=d.health_care_no")
 
         rows = curs.fetchall()
         
@@ -93,6 +129,17 @@ class Prescription():
         for row in rows:
             print(row)
         
+        string = input('Enter Patient name or number: ')
+        
+        if self.isNumber(string):
+            if self.goodNumber(string,"P"):
+                print("patient health care number is",int(string))
+                return int(string),False
+            else:
+                print("Invalid health care number")
+                return False,True
+        else:
+            return self.getDoctorNumber(string)
         
         string = input('Enter Patient name or number: ')
 
@@ -105,7 +152,7 @@ class Prescription():
     def getPatientNumber(self,string):
         curs = self.con.cursor()
 
-        curs.execute("select health_care_no from patient p where p.name like '%"+string+"%'")
+        curs.execute("select health_care_no from patient p where p.name like '"+string+"'")
 
         rows = curs.fetchall()
         
