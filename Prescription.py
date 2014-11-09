@@ -26,6 +26,10 @@ class Prescription():
 
         if self.patientCanTakeTest() and self.labCanDoTest():
             self.executeStatement()
+        else:
+            print("Sorry this patient cannot take this type of test, please try again")
+            self.main()
+            
 
         
     def getInputs(self):
@@ -40,8 +44,8 @@ class Prescription():
        
         go=True
         self.printSeparator()
-        
-        self.testName = self.getTestName()
+        while go:
+            self.testName,go = self.getTestName()
         
         
         go=True
@@ -73,7 +77,11 @@ class Prescription():
                 print("Invalid employee id")
                 return False,True
         else:
-            return self.getDoctorNumber(string)
+            if self.isReal(string,"D"):
+                return self.getDoctorNumber(string),False
+            else:
+                print(string,"is not a real doctor, try again")
+                return False,True
 
     def goodNumber(self,string,case):
         if case == "D":
@@ -93,15 +101,37 @@ class Prescription():
             else:
                 return True
         
-        
+    def isReal(self,string,case):
+        if case == "D":
+            curs = self.con.cursor()
+            curs.execute("select * from doctor d, patient p where d.health_care_no=p.health_care_no and p.name like'"+string+"'")
+            rows = curs.fetchall()
+            if len(rows) == 0:
+                return False
+            else:
+                return True
+        elif case == "T":
+            curs = self.con.cursor()
+            curs.execute("select * from test_type where test_name like'"+string+"'")
+            rows = curs.fetchall()
+            if len(rows) == 0:
+                return False
+            else:
+                return True
+        else:
+            curs = self.con.cursor()
+            curs.execute("select * from patient where name like'"+string+"'")
+            rows = curs.fetchall()
+            if len(rows) == 0:
+                return False
+            else:
+                return True
         
     def getDoctorNumber(self,string):
         
      
         curs = self.con.cursor()
-
         curs.execute("select employee_no from doctor d,patient p where p.name like '"+string+"' and p.health_care_no=d.health_care_no")
-
         rows = curs.fetchall()
         
         for row in rows:
@@ -115,9 +145,19 @@ class Prescription():
     
 
     def getTestName(self):
+    
+        curs = self.con.cursor()
+        curs.execute('select test_name from test_type')
+        rows = curs.fetchall()
+        for row in rows:
+            print(row)
+            
         string = input('Enter test name: ')
-        print("test name entered",string)
-        return string
+        if self.isReal(string,"T"):
+            return string,False 
+        else:
+            print("Not a real test, please try again")
+            return False, True
     
     def getPatient(self):
         curs = self.con.cursor()
@@ -139,15 +179,11 @@ class Prescription():
                 print("Invalid health care number")
                 return False,True
         else:
-            return self.getDoctorNumber(string)
-        
-        string = input('Enter Patient name or number: ')
-
-        if self.isNumber(string):
-            print("patient id is",int(string))
-            return int(string)
-        else:
-            return self.getPatientNumber(string)
+            if self.isReal(string,"P"):
+                return self.getPatientNumber(string),False
+            else:
+                print(string,"is not a real patient, try again")
+                return False,True
             
     def getPatientNumber(self,string):
         curs = self.con.cursor()
@@ -168,7 +204,7 @@ class Prescription():
         print("")
         
 
-    #checks if entered input doesn't violate database contraints. If input is
+    #checks if entered input doesn't violate database constraints. If input is
     #invalid, prints an error message as to why.
     def labCanDoTest(self):
 
@@ -192,19 +228,19 @@ class Prescription():
 
     def patientCanTakeTest(self):
 
-        statement = 'select count(*) \
+        statement = "select * \
                      from not_allowed na, test_type t, patient p \
                      where t.type_id = na.test_id \
                      and p.health_care_no = na.health_care_no \
-                     and p.name = ' + self.patient + ' \
-                     and t.test_name = ' + self.testName
+                     and p.health_care_no = " + str(self.patient) + " \
+                     and t.test_name like '" + self.testName+"'"  
 
         curs = self.con.cursor()
 
         curs.execute(statement)
-        cantTakeTest = curs.fetchAll()[0]
+        cantTakeTest = curs.fetchall()
 
-        if cantTakeTest > 0:
+        if len(cantTakeTest) > 0:
             #print error message
             return False
 
@@ -219,7 +255,7 @@ class Prescription():
     
 
     def executeStatement(self):
-        print(self.doctor)
+        print("******EXECUTING STATEMENT******")
 
 
 
