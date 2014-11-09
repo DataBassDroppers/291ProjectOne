@@ -24,7 +24,7 @@ class Prescription():
 
         self.getInputs()
 
-        if self.patientCanTakeTest() and self.labCanDoTest():
+        if self.patientCanTakeTest():
             self.executeStatement()
         else:
             print("Sorry this patient cannot take this type of test, please try again")
@@ -204,6 +204,58 @@ class Prescription():
         print("")
         
 
+    def patientCanTakeTest(self):
+
+        statement = "select * \
+                     from not_allowed na, test_type t, patient p \
+                     where t.type_id = na.test_id \
+                     and p.health_care_no = na.health_care_no \
+                     and p.health_care_no = " + str(self.patient) + " \
+                     and t.test_name like '" + self.testName+"'"  
+
+        curs = self.con.cursor()
+
+        curs.execute(statement)
+        cantTakeTest = curs.fetchall()
+
+        if len(cantTakeTest) > 0:
+            #print error message
+            return False
+
+        return True
+
+    def getTypeIdFromTestName(self, string):
+        
+        curs = self.con.cursor()
+
+        curs.execute("select type_id from test_type where \
+                      test_name = '" + self.testName + "'")
+
+        rows = curs.fetchall()
+
+        if len(rows) != 1 :
+            print('Error getting test type id.')
+            return ""
+
+        return rows[0]
+
+
+
+    def executeStatement(self):
+        print("******EXECUTING STATEMENT******")
+
+        self.typeId = self.getTypeIdFromTestName(self.testName)
+
+        self.testId = 123
+
+        curs = self.con.cursor()
+        curs.execute("insert into test_record (test_id, type_id, patient_no, employee_no) \
+                      values (" + str(self.testId) + ", " + str(self.typeId) + ", " +
+                      str(self.patient), "," + str(self.doctor) + ")")
+        
+
+
+'''        
     #checks if entered input doesn't violate database constraints. If input is
     #invalid, prints an error message as to why.
     def labCanDoTest(self):
@@ -225,37 +277,4 @@ class Prescription():
             return True
 
         return False
-
-    def patientCanTakeTest(self):
-
-        statement = "select * \
-                     from not_allowed na, test_type t, patient p \
-                     where t.type_id = na.test_id \
-                     and p.health_care_no = na.health_care_no \
-                     and p.health_care_no = " + str(self.patient) + " \
-                     and t.test_name like '" + self.testName+"'"  
-
-        curs = self.con.cursor()
-
-        curs.execute(statement)
-        cantTakeTest = curs.fetchall()
-
-        if len(cantTakeTest) > 0:
-            #print error message
-            return False
-
-        return True
-
-
-
-
-
-
-
-    
-
-    def executeStatement(self):
-        print("******EXECUTING STATEMENT******")
-
-
-
+'''
