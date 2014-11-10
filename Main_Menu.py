@@ -13,14 +13,14 @@ def display(first):
         print("INVALID INPUT.")
         return
     
-# returns 0 on an invalid input, returns 1 if valid
+# returns 0 on an invalid input, returns int of the input if valid
 def input_check(input):
     try:
         check = eval(input)    
         if check not in [1,2,3,4,5]:
             return 0
         else:
-            return 1
+            return check
     except:
         return 0
     
@@ -43,8 +43,8 @@ def run(input):
     
 def main():
     first = 1
-    running = 1
-    while running == 1:
+    
+    while 1:
         display(first)
         selection = input("Enter an option (1-5): ")
         check = input_check(selection)
@@ -53,7 +53,7 @@ def main():
             print(chr(27) + "[2J")
         elif check == 5:
             print("Program closing, thank you.")
-            running = 0
+            return
         else:
             run(eval(selection))
 
