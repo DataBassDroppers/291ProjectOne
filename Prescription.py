@@ -1,6 +1,6 @@
 import cx_Oracle
 import getpass #gets password without echoing
-
+import random
 
 class Prescription():
 
@@ -26,8 +26,10 @@ class Prescription():
 
         if self.patientCanTakeTest():
             self.executeStatement()
+            self.con.close()
         else:
             print("Sorry this patient cannot take this type of test, please try again")
+            self.con.close()
             self.main()
             
 
@@ -219,11 +221,25 @@ class Prescription():
         cantTakeTest = curs.fetchall()
 
         if len(cantTakeTest) > 0:
-            #print error message
             return False
 
         return True
 
+
+
+
+    def executeStatement(self):
+        print("******EXECUTING STATEMENT******")
+
+        self.typeId = self.getTypeIdFromTestName(self.testName)
+
+        self.testId = self.getUniqueTestId()
+
+        curs = self.con.cursor()
+        curs.execute("insert into test_record (test_id, type_id, patient_no, employee_no) values (" + str(self.testId) + ", " + str(self.typeId) + ", " + str(self.patient) + "," + str(self.doctor) + ")")
+
+        self.con.commit()
+        
     def getTypeIdFromTestName(self, string):
         
         curs = self.con.cursor()
@@ -237,23 +253,21 @@ class Prescription():
             print('Error getting test type id.')
             return ""
 
-        return rows[0]
+        return rows[0][0]
 
 
-
-    def executeStatement(self):
-        print("******EXECUTING STATEMENT******")
-
-        self.typeId = self.getTypeIdFromTestName(self.testName)
-
-        self.testId = 123
-
-        curs = self.con.cursor()
-        curs.execute("insert into test_record (test_id, type_id, patient_no, employee_no) \
-                      values (" + str(self.testId) + ", " + str(self.typeId) + ", " +
-                      str(self.patient), "," + str(self.doctor) + ")")
+    def getUniqueTestId(self):
         
+        curs = self.con.cursor()
+        curs.execute("select test_id from test_record")
 
+        rows = curs.fetchall()
+
+        while (True):
+            testId = random.randint(0, 10**3)
+
+            if all(testId != row[0] for row in rows):
+                return testId
 
 '''        
     #checks if entered input doesn't violate database constraints. If input is
