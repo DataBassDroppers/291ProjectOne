@@ -11,8 +11,10 @@ class Prescription():
 
         f = open('credentials', 'r')
         
-        username = f.readline()[:-1] #[-1] to trim \n
+	#[-1] to trim \n
+        username = f.readline()[:-1]
         password = f.readline()[:-1]
+        
         
         #password = getpass.getpass() # could use this to get password, but doesn't work with IDE
         
@@ -27,6 +29,8 @@ class Prescription():
         if self.patientCanTakeTest():
             self.executeStatement()
             self.con.close()
+            # return 1 on success
+            return 1
         else:
             print("Sorry this patient cannot take this type of test, please try again")
             self.con.close()

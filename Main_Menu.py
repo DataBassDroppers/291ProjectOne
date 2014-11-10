@@ -1,4 +1,4 @@
-#from Prescription import Prescription
+from Prescription import Prescription
 
 # takes a boolean first, if it is being run after a failed attempt
 def display(first):
@@ -28,17 +28,17 @@ def input_check(input):
 def run(input):
     if input == 1:
         pres = Prescription()
-        pres.main()
+        success = pres.main()
     elif input == 2:
         medt = Medical_test()
-        medt.main()
+        success = medt.main()
     elif input == 3:
         piu = Patient_Info_Update()
-        piu.main()
+        success = piu.main()
     elif input == 4:
         search = Search_Engine()
-        search.main()
-    return
+        success = search.main()
+    return success
         
     
 def main():
@@ -55,7 +55,7 @@ def main():
             print("Program closing, thank you.")
             return
         else:
-            run(eval(selection))
+            first = run(eval(selection))
 
 if __name__ == "__main__":
     main()
