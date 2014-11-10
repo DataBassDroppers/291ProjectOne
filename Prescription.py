@@ -240,7 +240,7 @@ class Prescription():
         self.testId = self.getUniqueTestId()
 
         curs = self.con.cursor()
-        curs.execute("insert into test_record (test_id, type_id, patient_no, employee_no) values (" + str(self.testId) + ", " + str(self.typeId) + ", " + str(self.patient) + "," + str(self.doctor) + ")")
+        curs.execute("insert into test_record (test_id, type_id, patient_no, employee_no,prescribe_date) values (" + str(self.testId) + "," + str(self.typeId) + "," + str(self.patient) + "," + str(self.doctor) + "," + "SYSDATE" + ")")
 
         self.con.commit()
         
