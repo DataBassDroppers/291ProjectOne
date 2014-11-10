@@ -30,7 +30,7 @@ def run(input):
         pres = Prescription()
         success = pres.main()
     elif input == 2:
-        medt = Medical_test()
+        medt = Medical_Test()
         success = medt.main()
     elif input == 3:
         piu = Patient_Info_Update()
