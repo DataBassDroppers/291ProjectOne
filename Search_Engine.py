@@ -19,14 +19,20 @@ class SearchEngine():
 
         self.con = cx_Oracle.connect(username + '/' + \
 	                        password + '@gwynne.cs.ualberta.ca:1521/CRS')
-                            
+        
+        print("Press 1 for patient search")
+        print("Press 2 for doctor search")
+        
+        print("")
         go=True                        
         while go:                    
-            print("Press 1 for patient search")
             choice=input("What would you like to search by ?")
             if choice == "1":
                 go=False
                 self.patientSearch()
+            elif choice == "2":
+                go=False
+                self.doctorSearch()
             else:
                 print("Invalid input")
             
@@ -50,12 +56,100 @@ class SearchEngine():
             counter=0
             for x in row:       
                 if counter == 3:
-                    #print(type((x.strftime("%Y-%m-%d %H:%M:%S"))))
                     x=(x.strftime("%Y-%m-%d %H:%M:%S"))
                     x=x[:-9]
                 counter+=1
                 list1.append(x)
             print(tuple(list1))
+            
+            
+    def doctorSearch(self):
+        go=True
+        while go:
+            print("Please enter doctor name or employee id")
+            doctor,go=self.getDoctor()
+            
+        start=self.getDate("S")
+        end=self.getDate("E")
+ 
+        curs = self.con.cursor()
+        curs.execute()
+        rows = curs.fetchall()        
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+    def getDate(self,case):
+        go=True
+        while go:
+            if case == "S":
+                date=input("Please enter start prescribe date in format DD/MM/YYYY")
+            else:
+                date=input("Please enter end prescribe date in format DD/MM/YYYY")
+            try:
+                int(date[:2])
+                int(date[3:5])
+                int(date[6:]) 
+                    
+            except ValueError:
+                print("Invalid input")
+            else:
+                if (0 <= int(date[:2])) and (int(date[:2]) <= 31) and (0 <= int(date[3:5])) and ( int(date[3:5])<= 12):
+                    go=False
+                else:
+                    print("Invalid input")
+            
+        return date    
+            
+            
+            
     def goodNumber(self,string,case):
         if case == "D":
             curs = self.con.cursor()
@@ -175,3 +269,28 @@ class SearchEngine():
         print("")
         print("-----------------------")
         print("")
+        
+    def getDoctor(self):
+        curs = self.con.cursor()
+
+        curs.execute('select name,employee_no from doctor d,patient p where p.health_care_no=d.health_care_no')
+
+        rows = curs.fetchall()
+
+        for row in rows:
+            print(row)
+        string = input('Enter Doctor name or number: ')
+
+        if self.isNumber(string):
+            if self.goodNumber(string,"D"):
+                print("employee id is",int(string))
+                return int(string),False
+            else:
+                print("Invalid employee id")
+                return False,True
+        else:
+            if self.isReal(string,"D"):
+                return self.getDoctorNumber(string),False
+            else:
+                print(string,"is not a real doctor, try again")
+                return False,True
