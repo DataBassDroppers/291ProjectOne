@@ -59,7 +59,12 @@ class Medical_Test():
 
 
     def getTestResult(self):
+        not_allowed = [chr(34), chr(39)]  
         result = input("Enter Result: ")
+        for each in result:
+            if each in not_allowed:
+                print("Apostrophe and Quotation characters are disallowed.")
+                return False, True
         if len(result) > 1024:
             print("Result entry exceeds character limit of 1024.")
             return False, True
@@ -256,10 +261,9 @@ class Medical_Test():
 	
 
         curs = self.con.cursor()
-
-        #curs.execute("update test_record set medical_lab='" + str(self.m_lab) + "', result='" + str(self.testResult) + "', test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD') where test_id=" + str(self.testId))
-        curs.execute("update test_record set medical_lab='" + str(self.m_lab) + "' where test_id=" + str(self.testId))
+        curs.execute("update test_record set medical_lab='" + str(self.m_lab) + "', result='" + str(self.testResult) + "', test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD') where test_id=" + str(self.testId))
 
 
+        self.printSeparator()
         self.con.commit()
         

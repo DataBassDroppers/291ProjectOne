@@ -242,6 +242,7 @@ class Prescription():
         curs = self.con.cursor()
         curs.execute("insert into test_record (test_id, type_id, patient_no, employee_no,prescribe_date) values (" + str(self.testId) + "," + str(self.typeId) + "," + str(self.patient) + "," + str(self.doctor) + "," + "SYSDATE" + ")")
 
+        self.printSeparator()
         self.con.commit()
         
     def getTypeIdFromTestName(self, string):
@@ -272,27 +273,3 @@ class Prescription():
 
             if all(testId != row[0] for row in rows):
                 return testId
-
-'''        
-    #checks if entered input doesn't violate database constraints. If input is
-    #invalid, prints an error message as to why.
-    def labCanDoTest(self):
-
-        #TODO: get self.labName, 
-        statement = 'select count(*) \
-                        from can_conduct c, test_type t \
-                        where t.type_id = c.test_id \
-                        and c.lab_name = ' + self.labName + ' \
-                        and t.test_name = ' + self.testName
-
-        curs = self.con.cursor()
-
-        curs.execute(statement)
-        canDoTest = curs.fetchAll()[0]
-
-        if canDoTest > 0:
-            #print error message
-            return True
-
-        return False
-'''
