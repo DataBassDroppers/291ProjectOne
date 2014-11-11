@@ -19,18 +19,9 @@ class Medical_Test():
 	                        password + '@gwynne.cs.ualberta.ca:1521/CRS')
 
         self.getInputs()
-
-        if self.patientCanTakeTest():
-            self.executeStatement()
-            self.con.close()
-            # return 1 on success
-            return 1
-        else:
-            print("Sorry this patient cannot take this type of test, please try again")
-            self.con.close()
-            self.main()
-            
-
+        self.executeStatement()
+        self.con.close()
+        
         
     def getInputs(self):
 	
@@ -66,7 +57,7 @@ class Medical_Test():
  
 
 
-    def getTestResult():
+    def getTestResult(self):
         result = input("Enter Result: ")
         if len(result) > 1024:
             print("Result entry exceeds character limit of 1024.")
@@ -78,14 +69,13 @@ class Medical_Test():
     def getM_Lab(self):
         curs = self.con.cursor()
 
-        curs.execute('select lab_name, from medical_lab m')
-        #curs.execute('select name,employee_no from doctor d,patient p where p.health_care_no=d.health_care_no')
+        curs.execute('select lab_name from medical_lab m')
 
         rows = curs.fetchall()
 
         for row in rows:
             print(row)
-        string = input('Enter Medical Lab Name')
+        string = input('Enter Medical Lab Name: ')
 
         if self.isReal(string,"L"):
             print("Lab name is:", string)
@@ -201,6 +191,7 @@ class Medical_Test():
         for row in rows:
             print(row)
 	
+        print()
         string = input('Enter Test ID: ')
 	
         if self.isNumber(string):
@@ -264,7 +255,8 @@ class Medical_Test():
 	
 
         curs = self.con.cursor()
-        curs.execute("update test_record set medical_lab=" + str(self.m_lab) + ", result=" + str(self.testResult) + ", test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD')")
+
+        curs.execute("update test_record set medical_lab='" + str(self.m_lab) + "', result='" + str(self.testResult) + "', test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD') where test_id=" + str(self.testId))
 
         self.con.commit()
         
