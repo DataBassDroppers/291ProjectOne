@@ -1,6 +1,6 @@
 import cx_Oracle
 import getpass #gets password without echoing
-import random
+import datetime
 
 class Medical_Test():
     
@@ -33,28 +33,46 @@ class Medical_Test():
 
         
     def getInputs(self):
-        go=True
-        
-        self.printSeparator()
-        
-        while go:
-            self.m_lab,go = self.getM_Lab()
-       
-       
-        go=True
-        self.printSeparator()
-        while go:
-            self.testName,go = self.getTestName()
-        
-        
+	
         go=True
         self.printSeparator()
         while go:
             self.patient,go = self.getPatient()
+	    
+        go=True
+        self.printSeparator()
+        while go:
+            self.testId,go = self.getTestRecord(self.patient)	
+	
+	
+        go=True
+        self.printSeparator()
+        while go:
+            self.m_lab,go = self.getM_Lab()
+       
+        # testDate gets a string of "yyyy,mm,dd"
+        go=True
+        self.printSeparator()
+        while go:
+            self.testDate,go = self.getTestDate()
+        
+        go=True
+	self.printSeparator()
+	while go:
+	    self.testResult,go = self.getTestResult()
+        
+
         self.printSeparator()
  
-        #self.patient= self.getPatient()
 
+
+    def getTestResult():
+	result = input("Enter Result: ")
+	if len(result) > 1024:
+	    print("Result entry exceeds character limit of 1024.")
+	    return False, True
+	else:
+	    return result, False
 
     
     def getM_Lab(self):
@@ -75,8 +93,31 @@ class Medical_Test():
 	else:
 	    print("Invalid lab name")
 	    return False,True
-
-
+	
+    def getTestDate(self):
+	string = input('Enter Test Date "yyyy/mm/dd": ')
+	if len(string) != 10:
+	    print("Invalid input.")
+	    return False, True
+	else:
+	    year = string[0:4]
+	    month = string[5:7]
+	    day = string[8:]
+	    if self.isNumber(year) and self.isNumber(month) and self.isNumber(day):
+		correctDate = None
+		try:
+		    newDate = datetime.datetime(int(year),int(month),int(day))
+		    correctDate = True
+		except ValueError:
+		    correctDate = False
+		if correctDate:
+		    return string,False
+		else:
+		    print("Invalid date.")
+		    return False, True
+	    
+	    
+	
     def goodNumber(self,string,case):
         if case == "D":
             curs = self.con.cursor()
@@ -86,6 +127,14 @@ class Medical_Test():
                 return False
             else:
                 return True
+	elif case == "T":
+	    curs = self.con.cursor()
+	    curs.execute("select * from test_record where test_id like '"+string+"'")
+	    rows = curs.fetchall()
+	    if len(rows) ==0:
+		return False
+	    else:
+		return True
         else:
             curs = self.con.cursor()
             curs.execute("select * from patient where health_care_no like'"+string+"'")
@@ -120,6 +169,14 @@ class Medical_Test():
 		return False
 	    else:
 		return True
+	elif case == "R":
+	    curs = self.con.cursor()
+	    curs.execute("select * from test_record where test_id like '"+string+"'")
+	    rows = curs.fetchall()
+	    if len(rows) == 0:
+		return False
+	    else:
+		return True
         else:
             curs = self.con.cursor()
             curs.execute("select * from patient where name like'"+string+"'")
@@ -128,39 +185,34 @@ class Medical_Test():
                 return False
             else:
                 return True
-        
-    def getDoctorNumber(self,string):
-        
-     
-        curs = self.con.cursor()
-        curs.execute("select employee_no from doctor d,patient p where p.name like '"+string+"' and p.health_care_no=d.health_care_no")
-        rows = curs.fetchall()
-        
-        for row in rows:
-            id1=int(row[0])
-        print(string,"employee id is",id1)
-        return id1
     
     
     def isNumber(self, string):
         return string.isdigit()
     
-
-    def getTestName(self):
-    
-        curs = self.con.cursor()
-        curs.execute('select test_name from test_type')
-        rows = curs.fetchall()
-        for row in rows:
-            print(row)
-            
-        string = input('Enter test name: ')
-        if self.isReal(string,"T"):
-            return string,False 
-        else:
-            print("Not a real test, please try again")
-            return False, True
-    
+	
+    def getTestRecord(self, p_no):
+	curs = self.con.cursor()
+	
+	curs.execute("select * from test_record where patient_no like'"+str(p_no)+"'")
+	
+	rows = curs.fetchall()
+	
+	for row in rows:
+	    print(row)
+	
+	string = input('Enter Test ID: ')
+	
+	if self.isNumber(string):
+	    if self.isReal(string, "R"):
+		print("Test ID selected is", int(string))
+		return int(string), False
+	    else:
+		print("Invalid test id.")
+		return False, True
+		
+	
+    # returns the patient_no on success
     def getPatient(self):
         curs = self.con.cursor()
 
@@ -206,65 +258,13 @@ class Medical_Test():
         print("")
         
 
-    def patientCanTakeTest(self):
-
-        statement = "select * \
-                     from not_allowed na, test_type t, patient p \
-                     where t.type_id = na.test_id \
-                     and p.health_care_no = na.health_care_no \
-                     and p.health_care_no = " + str(self.patient) + " \
-                     and t.test_name like '" + self.testName+"'"  
-
-        curs = self.con.cursor()
-
-        curs.execute(statement)
-        cantTakeTest = curs.fetchall()
-
-        if len(cantTakeTest) > 0:
-            return False
-
-        return True
-
-
-
 
     def executeStatement(self):
         print("******EXECUTING STATEMENT******")
-
-        self.typeId = self.getTypeIdFromTestName(self.testName)
-
-        self.testId = self.getUniqueTestId()
+	
 
         curs = self.con.cursor()
-        curs.execute("insert into test_record (test_id, type_id, patient_no, employee_no) values (" + str(self.testId) + ", " + str(self.typeId) + ", " + str(self.patient) + "," + str(self.doctor) + ")")
+	curs.execute("update test_record set medical_lab=" + str(self.m_lab) + ", result=" + str(self.testResult) + ", test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD')")
 
         self.con.commit()
         
-    def getTypeIdFromTestName(self, string):
-        
-        curs = self.con.cursor()
-
-        curs.execute("select type_id from test_type where \
-                      test_name = '" + self.testName + "'")
-
-        rows = curs.fetchall()
-
-        if len(rows) != 1 :
-            print('Error getting test type id.')
-            return ""
-
-        return rows[0][0]
-
-
-    def getUniqueTestId(self):
-        
-        curs = self.con.cursor()
-        curs.execute("select test_id from test_record")
-
-        rows = curs.fetchall()
-
-        while (True):
-            testId = random.randint(0, 10**3)
-
-            if all(testId != row[0] for row in rows):
-                return testId	
