@@ -21,6 +21,7 @@ class Medical_Test():
         self.getInputs()
         self.executeStatement()
         self.con.close()
+        return 1
         
         
     def getInputs(self):
@@ -256,7 +257,9 @@ class Medical_Test():
 
         curs = self.con.cursor()
 
-        curs.execute("update test_record set medical_lab='" + str(self.m_lab) + "', result='" + str(self.testResult) + "', test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD') where test_id=" + str(self.testId))
+        #curs.execute("update test_record set medical_lab='" + str(self.m_lab) + "', result='" + str(self.testResult) + "', test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD') where test_id=" + str(self.testId))
+        curs.execute("update test_record set medical_lab='" + str(self.m_lab) + "' where test_id=" + str(self.testId))
+
 
         self.con.commit()
         
