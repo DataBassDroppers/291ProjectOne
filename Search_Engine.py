@@ -73,9 +73,27 @@ class SearchEngine():
         end=self.getDate("E")
  
         curs = self.con.cursor()
-        curs.execute()
+        curs.execute("select p.health_care_no,p.name,t.test_name,r.prescribe_date \
+                              from patient p, test_name t, test_record r \
+                              where t.employee_id="+str(doctor)+"\
+                              and \
+                              r.prescribe_date >= '"+start+"' \
+                              and \
+                              r.prescribe_date <= '"+end+"' \
+                              and \
+                              p.health_care_no = r.patient_no")
         rows = curs.fetchall()        
-            
+        
+        for row in rows: 
+            list1=[]
+            counter=0
+            for x in row:       
+                if counter == 3:
+                    x=(x.strftime("%Y-%m-%d %H:%M:%S"))
+                    x=x[:-9]
+                counter+=1
+                list1.append(x)
+            print(tuple(list1))    
             
             
             
