@@ -9,13 +9,13 @@ class Medical_Test():
     
     def main(self):
 	
-	f = open('credentials', 'r')
-	#[-1] to trim \n
-	username = f.readline()[:-1]
-	password = f.readline()[:-1]
-	#password = getpass.getpass() # could use this to get password, but doesn't work with IDE
+        f = open('credentials', 'r')
+        #[-1] to trim \n
+        username = f.readline()[:-1]
+        password = f.readline()[:-1]
+        #password = getpass.getpass() # could use this to get password, but doesn't work with IDE
 
-	self.con = cx_Oracle.connect(username + '/' + \
+        self.con = cx_Oracle.connect(username + '/' + \
 	                        password + '@gwynne.cs.ualberta.ca:1521/CRS')
 
         self.getInputs()
@@ -57,9 +57,9 @@ class Medical_Test():
             self.testDate,go = self.getTestDate()
         
         go=True
-	self.printSeparator()
-	while go:
-	    self.testResult,go = self.getTestResult()
+        self.printSeparator()
+        while go:
+            self.testResult,go = self.getTestResult()
         
 
         self.printSeparator()
@@ -67,12 +67,12 @@ class Medical_Test():
 
 
     def getTestResult():
-	result = input("Enter Result: ")
-	if len(result) > 1024:
-	    print("Result entry exceeds character limit of 1024.")
-	    return False, True
-	else:
-	    return result, False
+        result = input("Enter Result: ")
+        if len(result) > 1024:
+            print("Result entry exceeds character limit of 1024.")
+            return False, True
+        else:
+            return result, False
 
     
     def getM_Lab(self):
@@ -88,33 +88,33 @@ class Medical_Test():
         string = input('Enter Medical Lab Name')
 
         if self.isReal(string,"L"):
-	    print("Lab name is:", string)
-	    return string,False
-	else:
-	    print("Invalid lab name")
-	    return False,True
+            print("Lab name is:", string)
+            return string,False
+        else:
+            print("Invalid lab name")
+            return False,True
 	
     def getTestDate(self):
-	string = input('Enter Test Date "yyyy/mm/dd": ')
-	if len(string) != 10:
-	    print("Invalid input.")
-	    return False, True
-	else:
-	    year = string[0:4]
-	    month = string[5:7]
-	    day = string[8:]
-	    if self.isNumber(year) and self.isNumber(month) and self.isNumber(day):
-		correctDate = None
-		try:
-		    newDate = datetime.datetime(int(year),int(month),int(day))
-		    correctDate = True
-		except ValueError:
-		    correctDate = False
-		if correctDate:
-		    return string,False
-		else:
-		    print("Invalid date.")
-		    return False, True
+        string = input('Enter Test Date "yyyy/mm/dd": ')
+        if len(string) != 10:
+            print("Invalid input.")
+            return False, True
+        else:
+            year = string[0:4]
+            month = string[5:7]
+            day = string[8:]
+            if self.isNumber(year) and self.isNumber(month) and self.isNumber(day):
+                correctDate = None
+                try:
+                    newDate = datetime.datetime(int(year),int(month),int(day))
+                    correctDate = True
+                except ValueError:
+                    correctDate = False
+                if correctDate:
+                    return string,False
+                else:
+                    print("Invalid date.")
+                    return False, True
 	    
 	    
 	
@@ -127,14 +127,14 @@ class Medical_Test():
                 return False
             else:
                 return True
-	elif case == "T":
-	    curs = self.con.cursor()
-	    curs.execute("select * from test_record where test_id like '"+string+"'")
-	    rows = curs.fetchall()
-	    if len(rows) ==0:
-		return False
-	    else:
-		return True
+        elif case == "T":
+            curs = self.con.cursor()
+            curs.execute("select * from test_record where test_id like '"+string+"'")
+            rows = curs.fetchall()
+            if len(rows) ==0:
+                return False
+            else:
+                return True
         else:
             curs = self.con.cursor()
             curs.execute("select * from patient where health_care_no like'"+string+"'")
@@ -161,22 +161,22 @@ class Medical_Test():
                 return False
             else:
                 return True
-	elif case == "L":
-	    curs = self.con.cursor()
-	    curs.execute("select * from medical_lab where lab_name like '"+string+"'")
-	    rows = curs.fetchall()
-	    if len(rows) == 0:
-		return False
-	    else:
-		return True
-	elif case == "R":
-	    curs = self.con.cursor()
-	    curs.execute("select * from test_record where test_id like '"+string+"'")
-	    rows = curs.fetchall()
-	    if len(rows) == 0:
-		return False
-	    else:
-		return True
+        elif case == "L":
+            curs = self.con.cursor()
+            curs.execute("select * from medical_lab where lab_name like '"+string+"'")
+            rows = curs.fetchall()
+            if len(rows) == 0:
+                return False
+            else:
+                return True
+        elif case == "R":
+            curs = self.con.cursor()
+            curs.execute("select * from test_record where test_id like '"+string+"'")
+            rows = curs.fetchall()
+            if len(rows) == 0:
+                return False
+            else:
+                return True
         else:
             curs = self.con.cursor()
             curs.execute("select * from patient where name like'"+string+"'")
@@ -192,24 +192,24 @@ class Medical_Test():
     
 	
     def getTestRecord(self, p_no):
-	curs = self.con.cursor()
+        curs = self.con.cursor()
 	
-	curs.execute("select * from test_record where patient_no like'"+str(p_no)+"'")
+        curs.execute("select * from test_record where patient_no like'"+str(p_no)+"'")
 	
-	rows = curs.fetchall()
+        rows = curs.fetchall()
 	
-	for row in rows:
-	    print(row)
+        for row in rows:
+            print(row)
 	
-	string = input('Enter Test ID: ')
+        string = input('Enter Test ID: ')
 	
-	if self.isNumber(string):
-	    if self.isReal(string, "R"):
-		print("Test ID selected is", int(string))
-		return int(string), False
-	    else:
-		print("Invalid test id.")
-		return False, True
+        if self.isNumber(string):
+            if self.isReal(string, "R"):
+                print("Test ID selected is", int(string))
+                return int(string), False
+            else:
+                print("Invalid test id.")
+                return False, True
 		
 	
     # returns the patient_no on success
@@ -264,7 +264,7 @@ class Medical_Test():
 	
 
         curs = self.con.cursor()
-	curs.execute("update test_record set medical_lab=" + str(self.m_lab) + ", result=" + str(self.testResult) + ", test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD')")
+        curs.execute("update test_record set medical_lab=" + str(self.m_lab) + ", result=" + str(self.testResult) + ", test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD')")
 
         self.con.commit()
         

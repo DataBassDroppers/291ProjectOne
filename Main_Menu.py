@@ -1,4 +1,5 @@
 from Prescription import Prescription
+from Medical_Test import Medical_Test
 
 # takes a boolean first, if it is being run after a failed attempt
 def display(first):
