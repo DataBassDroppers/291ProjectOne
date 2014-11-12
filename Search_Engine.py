@@ -19,14 +19,13 @@ class SearchEngine():
 
         self.con = cx_Oracle.connect(username + '/' + \
 	                        password + '@gwynne.cs.ualberta.ca:1521/CRS')
-        
-        print("Press 1 for patient search")
-        print("Press 2 for doctor search")
-        
-        print("")
+        print()
+        print("[1] Patient search.")
+        print("[2] Doctor search.")
+        print()
         go=True                        
         while go:                    
-            choice=input("What would you like to search by ?")
+            choice=input("Enter search option: ")
             if choice == "1":
                 go=False
                 self.patientSearch()
@@ -34,7 +33,7 @@ class SearchEngine():
                 go=False
                 self.doctorSearch()
             else:
-                print("Invalid input")
+                print("Invalid input.")
             
     def patientSearch(self):
         go=True

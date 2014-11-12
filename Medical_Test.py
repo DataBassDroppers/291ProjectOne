@@ -119,18 +119,18 @@ class Medical_Test():
             year = string[0:4]
             month = string[5:7]
             day = string[8:]
-            if self.isNumber(year) and self.isNumber(month) and self.isNumber(day):
+            if self.isNumber(year) and self.isNumber(month) and self.isNumber(day) and string[4] == "/" and string[7] == "/":
                 correctDate = None
                 try:
                     newDate = datetime.datetime(int(year),int(month),int(day))
                     correctDate = True
                 except ValueError:
                     correctDate = False
-                if correctDate:
-                    return string,False
-                else:
-                    print("Invalid date.")
-                    return False, True
+            if correctDate:
+                return string,False
+            else:
+                print("Invalid date.")
+                return False, True
 	    
 	    
 	

@@ -1,6 +1,7 @@
 import cx_Oracle
 import getpass #gets password without echoing
 import random
+import datetime
 
 class Patient_Info_Update():
     
@@ -23,104 +24,265 @@ class Patient_Info_Update():
         if cont == 0:
             return 1  
 	    
-        self.executeStatement()
+        #self.executeStatement()
         self.con.close()
         return 1	
 	
 	
 	
-    
-    def getInputs(self):
+    def printOptions(self):
         print()	
         print("[1] Enter new Patient")
         print("[2] Edit Existing Patient")
         print("[3] Return to main menu.")
-	
+    
+    def getInputs(self):
         while 1:
+            self.name_update = False
+            self.address_update = False
+            self.birth_update = False
+            self.phone_update = False
+            self.printOptions()
             ans = input("Enter a choice: ")
             if ans == "1":
+                
                 self.HCN = self.getUniqueHCN()
+
                 self.printSeparator()
-                self.name = self.setName()
-                break
+                self.name = self.getName()
+
+                go=True
+                self.printSeparator()
+                while go:
+                    self.address,go = self.getAddress()
+               
+                go=True
+                self.printSeparator()
+                while go:                
+                    self.birth,go = self.getBirthDate()		
+
+                self.printSeparator()
+                self.phone = self.getPhone()
+
+                self.printSeparator()
+                print("Patient Name: " + self.name)
+                print("Patient Address: " + self.address)
+                print("Patient Birth Date: " + self.birth)
+                print("Patient Phone Number: " + self.phone)
+                print()
+                while 1: 
+                    conf = input("Confirm information (y/n)")
+                    if conf == "y":
+                        print("Information confirmed.")
+                        return 1
+                    elif conf == "n":
+                        print("Information not confirmed, returning to start.")
+                        break
+                    else:
+                        print("Invalid choice, pick 'y' or 'n'")
+		    
+
             elif ans == "2":
-		#do stuff
-                break
+                go=True		
+                self.printSeparator()
+                while go:
+                    self.patient,go = self.getPatient()
+                not_done = True
+                while not_done:
+                    print()
+                    print("[1] Update patient name.")
+                    print("[2] Update patient address.")
+                    print("[3] Update patient birth date.")
+                    print("[4] Update patient phone number.")
+                    print("[5] Return to menu.")
+                    check = input("Enter an option: ")
+                    if check == "1":
+                        self.printSeparator()
+                        self.name = self.getName()
+                        self.name_update = True
+                        ask = input("Update another value? (y/n): ")
+                        while 1:
+                            if ask == "y":
+                                break
+                            elif ask == "n":
+                                not_done = False
+                                break
+                            else:
+                                print("Invalid input. ")
+                                print()
+                    elif check == "2":
+                        go=True
+                        self.printSeparator()
+                        while go:
+                            self.address,go = self.getAddress()
+                        self.address_update = True
+                        ask = input("Update another value? (y/n): ")
+                        while 1:
+                            if ask == "y":
+                                break
+                            elif ask == "n":
+                                not_done = False
+                                break
+                            else:
+                                print("Invalid input. ")
+                                print()
+                    elif check == "3":
+                        go=True
+                        self.printSeparator()
+                        while go:                
+                            self.birth,go = self.getBirthDate()	
+                        self.birth_update = True
+                        ask = input("Update another value? (y/n): ")
+                        while 1:
+                            if ask == "y":
+                                break
+                            elif ask == "n":
+                                not_done = False
+                                break
+                            else:
+                                print("Invalid input. ")
+                                print()
+                    elif check == "4":
+                        self.printSeparator()
+                        self.phone = self.getPhone()
+                        self.phone_update = True
+                        ask = input("Update another value? (y/n): ")
+                        while 1:
+                            if ask == "y":
+                                break
+                            elif ask == "n":
+                                not_done = False
+                                break
+                            else:
+                                print("Invalid input. ")
+                                print()
+                    elif check == "5":
+                        break
+                    else:
+                        print("Invalid input.")
+                        print()
+                self.printSeparator()
+                if self.name_update:
+                    print("Patient Name: " + self.name)
+                if self.address_update:                
+                    print("Patient Address: " + self.address)
+                if self.birth_update:                
+                    print("Patient Birth Date: " + self.birth)
+                if self.phone_update:                
+                    print("Patient Phone Number: " + self.phone)
+                print()
+                while 1: 
+                    conf = input("Confirm updates (y/n): ")
+                    if conf == "y":
+                        print("Information confirmed.")
+                        return 1
+                    elif conf == "n":
+                        print("Information not confirmed, returning to start.")
+                        break
+                    else:
+                        print("Invalid choice, pick 'y' or 'n'")                
+
             elif ans == "3":
                 return 0		
             else:
                 print("Invalid choice.")
-    
-        go=True
-        self.printSeparator()
-        while go:
-            self.patient,go = self.getPatient()
-	    
-        go=True
-        self.printSeparator()
-        while go:
-            self.testId,go = self.getTestRecord(self.patient)	
-	
-	
-        go=True
-        self.printSeparator()
-        while go:
-            self.m_lab,go = self.getM_Lab()
-       
-        # testDate gets a string of "yyyy/mm/dd"
-        go=True
-        self.printSeparator()
-        while go:
-            self.testDate,go = self.getTestDate()
-        
-        go=True
-        self.printSeparator()
-        while go:
-            self.testResult,go = self.getTestResult()
         
 
-        self.printSeparator()
-        return 1
- 
+		
+		
+		
+		
+		
+    def input_check(input):
+        try:
+            check = eval(input)    
+            if check not in [1,2,3,4,5]:
+                return 0
+            else:
+                return check
+        except:
+            return 0	
 
 
-    def setName(self):
-        ans = False	
+    def getPhone(self):
+        ans = True	
         while ans:
+            print()
+            phone = input("Input Patient Phone Number (10-digits): ")
+            if phone.isdigit() and len(phone) == 10:		
+                reply = input("Confirm patient name :: " + phone + " :: (y/n): ")
+                if reply == "y":
+                    ans = False
+                elif reply == "n":		
+                    print("Phone incorrect, returning to start.")		 
+                else:
+                    print("Invalid input, returning to start.")
+            else:                
+                print("Invalid input. Enter phone as a single number without spaces or dashes.")
+                print()
+        return phone        	
+	
+		
+
+    def getName(self):
+        ans = True	
+        while ans:
+            print()
             name = input("Input Patient Name: ")
             reply = input("Confirm patient name :: " + name + " :: (y/n): ")
             if reply == "y":
-                ans = True
+                ans = False
             elif reply == "n":		
-                print("Name incorrect, returning to start.")		
+                print("Name incorrect, enter again.")		
             else:
-                print("Invalid input, returning to start.")
+                print("Invalid input, enter again.")
         return name
-	    
 
+    def getAddress(self):
+        not_allowed = [chr(34), chr(39)]  
+        ans = True
+        while ans:
+            print()
+            address = input("Enter Address: ")
+            reply = input("Confirm patient address :: " + address + " :: (y/n): ")
+            if reply == "y":
+                for each in address:
+                    if each in not_allowed:
+                        print("Apostrophe and Quotation characters are disallowed.")
+                        return False, True
+                if len(address) > 200:
+                    print("Address entry exceeds character limit of 200.")
+                    return False, True
+                else:
+                    return address, False
+            elif reply == "n":
+                print("Address incorrect, enter again.")
+            else:
+                print("Invalid input, enter again.")
 
-
-    
-    def getM_Lab(self):
-        curs = self.con.cursor()
-
-        curs.execute('select lab_name from medical_lab m')
-
-        rows = curs.fetchall()
-
-        for row in rows:
-            print(row)
-        string = input('Enter Medical Lab Name: ')
-
-        if self.isReal(string,"L"):
-            print("Lab name is:", string)
-            return string,False
+    def getBirthDate(self):
+        print()
+        string = input('Enter Birth Date "yyyy/mm/dd": ')
+        if len(string) != 10:
+            print("Invalid input.")
+            return False, True
         else:
-            print("Invalid lab name")
-            return False,True
-	
-
-	    
+            year = string[0:4]
+            month = string[5:7]
+            day = string[8:]
+            correctDate = None
+            if self.isNumber(year) and self.isNumber(month) and self.isNumber(day) and string[4] == "/" and string[7] == "/":
+                try:
+                    newDate = datetime.datetime(int(year),int(month),int(day))
+                    correctDate = True
+                except ValueError:
+                    correctDate = False
+            if correctDate:
+                return string,False
+            else:
+                print("Invalid date.")
+                return False, True
+		
 	
     def goodNumber(self,string,case):
         if case == "D":
@@ -235,7 +397,8 @@ class Patient_Info_Update():
                 print("patient health care number is",int(string))
                 return int(string),False
             else:
-                print("Invalid health care number")
+                print("Invalid health care number.")
+                print()
                 return False,True
         else:
             if self.isReal(string,"P"):
@@ -243,7 +406,7 @@ class Patient_Info_Update():
             else:
                 print(string,"is not a real patient, try again")
                 return False,True
-            
+
     def getPatientNumber(self,string):
         curs = self.con.cursor()
 
@@ -253,8 +416,8 @@ class Patient_Info_Update():
         
         for row in rows:
             id1=int(row[0])
-        print(string,"employee id is",id1)
         return id1
+
         
     
     def printSeparator(self):
@@ -266,7 +429,7 @@ class Patient_Info_Update():
     def getUniqueHCN(self):
         
         curs = self.con.cursor()
-        curs.execute("select test_id from test_record")
+        curs.execute("select health_care_no from patient")
 
         rows = curs.fetchall()
 

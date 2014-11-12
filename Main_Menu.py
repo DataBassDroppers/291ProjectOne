@@ -40,7 +40,7 @@ def run(input):
         piu = Patient_Info_Update()
         success = piu.main()
     elif input == 4:
-        search = Search_Engine()
+        search = SearchEngine()
         success = search.main()
     return success
         

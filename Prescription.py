@@ -37,6 +37,7 @@ class Prescription():
             print("Sorry this patient cannot take this type of test, please try again")
             self.con.close()
             self.main()
+            return 1
             
 
         
@@ -54,6 +55,7 @@ class Prescription():
                 return 0
             else:
                 print("Invalid choice.")
+                print()
 	
 	
 	
