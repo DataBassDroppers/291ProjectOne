@@ -24,7 +24,9 @@ class Prescription():
         
         
 
-        self.getInputs()
+        cont = self.getInputs()
+        if cont == 0:
+            return 1 
 
         if self.patientCanTakeTest():
             self.executeStatement()
@@ -39,6 +41,23 @@ class Prescription():
 
         
     def getInputs(self):
+        print()
+        print("[1] Enter Prescription Information.")
+        print("[2] Return to main menu.")
+
+       
+        while 1:
+            ans = input("Enter a choice: ")
+            if ans == "1":
+                break
+            elif ans == "2":
+                return 0
+            else:
+                print("Invalid choice.")
+	
+	
+	
+	
         go=True
         
         self.printSeparator()

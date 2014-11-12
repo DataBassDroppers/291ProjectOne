@@ -1,8 +1,11 @@
 from Prescription import Prescription
 from Medical_Test import Medical_Test
+from Patient_Info_Update import Patient_Info_Update
+from Search_Engine import SearchEngine
 
 # takes a boolean first, if it is being run after a failed attempt
 def display(first):
+    print()
     print("[1] Prescribe a medical test.")
     print("[2] Enter medical test information.")
     print("[3] Update patient information.")

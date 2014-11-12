@@ -18,13 +18,33 @@ class Medical_Test():
         self.con = cx_Oracle.connect(username + '/' + \
 	                        password + '@gwynne.cs.ualberta.ca:1521/CRS')
 
-        self.getInputs()
+        cont = self.getInputs()
+        if cont == 0:
+            return 1
+        
         self.executeStatement()
         self.con.close()
         return 1
         
         
     def getInputs(self):
+        print()
+        print("[1] Enter Test Result Information.")
+        print("[2] Return to main menu.")
+
+       
+        while 1:
+            ans = input("Enter a choice: ")
+            if ans == "1":
+                break
+            elif ans == "2":
+                return 0
+            else:
+                print("Invalid choice.")
+
+
+
+	
 	
         go=True
         self.printSeparator()
@@ -52,10 +72,10 @@ class Medical_Test():
         self.printSeparator()
         while go:
             self.testResult,go = self.getTestResult()
-        
-
+    
         self.printSeparator()
- 
+        
+        return 1
 
 
     def getTestResult(self):
