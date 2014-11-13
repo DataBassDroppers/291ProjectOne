@@ -323,6 +323,7 @@ SELECT c1.type_id,min(c1.age),ab_rate\
                 return int(string),False
             else:
                 print("Invalid health care number")
+                print()
                 return False,True
         else:
             if self.isReal(string,"P"):
@@ -334,14 +335,24 @@ SELECT c1.type_id,min(c1.age),ab_rate\
     def getPatientNumber(self,string):
         curs = self.con.cursor()
 
-        curs.execute("select health_care_no from patient p where p.name like '"+string+"'")
+        curs.execute("select * from patient p where p.name like '"+string+"'")
 
         rows = curs.fetchall()
-        
-        for row in rows:
-            id1=int(row[0])
-        print(string,"employee id is",id1)
-        return id1
+        tmp = []
+        if len(rows) > 1:
+            while 1:
+                print()
+                print("Health Care Number | Name | Address | Date of Birth | Phone number")
+                for row in rows:
+                    print(row)
+                    tmp.append(str(row[0]))
+                pick = input("Enter ID of correct patient: ")
+                if pick in tmp:
+                    return pick
+                else:
+                    print("Incorrect value, enter valid ID of correct patient.")
+        else:
+            return rows[0][0]
         
     
     def printSeparator(self):
