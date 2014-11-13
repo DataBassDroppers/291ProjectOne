@@ -33,6 +33,7 @@ class SearchEngine():
                 self.alarmingAgeSearch()
             else:
                 print("Invalid input.")
+        self.con.close()
         return 1
             
     def patientSearch(self):
