@@ -22,6 +22,7 @@ class SearchEngine():
         print()
         print("[1] Patient search.")
         print("[2] Doctor search.")
+        print("[3] At risk patients.")
         print()
         go=True                        
         while go:                    
@@ -32,6 +33,9 @@ class SearchEngine():
             elif choice == "2":
                 go=False
                 self.doctorSearch()
+            elif choice == "3":
+                go=False
+                self.alarmingAgeSearch()
             else:
                 print("Invalid input.")
             
@@ -55,8 +59,9 @@ class SearchEngine():
             counter=0
             for x in row:       
                 if counter == 3:
-                    x=(x.strftime("%Y-%m-%d %H:%M:%S"))
-                    x=x[:-9]
+                    if x is not None: 
+                        x=(x.strftime("%Y-%m-%d %H:%M:%S"))
+                        x=x[:-9]
                 counter+=1
                 list1.append(x)
             print(tuple(list1))
@@ -73,12 +78,16 @@ class SearchEngine():
  
         curs = self.con.cursor()
         curs.execute("select p.health_care_no,p.name,t.test_name,r.prescribe_date \
-                              from patient p, test_name t, test_record r \
-                              where t.employee_id="+str(doctor)+"\
+                              from patient p, test_type t, test_record r, doctor d \
+                              where d.employee_no="+str(doctor)+"\
                               and \
-                              r.prescribe_date >= '"+start+"' \
+                              d.employee_no = r.employee_no \
                               and \
-                              r.prescribe_date <= '"+end+"' \
+                              t.type_id = r.type_id \
+                              and \
+                              r.prescribe_date >= to_date('"+start+"', 'DD/MM/YYYY') \
+                              and \
+                              r.prescribe_date <= to_date('"+end+"', 'DD/MM/YYYY') \
                               and \
                               p.health_care_no = r.patient_no")
         rows = curs.fetchall()        
@@ -88,57 +97,110 @@ class SearchEngine():
             counter=0
             for x in row:       
                 if counter == 3:
-                    x=(x.strftime("%Y-%m-%d %H:%M:%S"))
-                    x=x[:-9]
+                    if x is not None:
+                        x=(x.strftime("%Y-%m-%d %H:%M:%S"))
+                        x=x[:-9]
                 counter+=1
                 list1.append(x)
-            print(tuple(list1))    
+            print(tuple(list1))
             
+
+    def alarmingAgeSearch(self):
+
+        go=True
+        while go:
+            print("Please enter a test type")
+            testName,go=self.getTestName()
+
+
+        typeId = self.getTypeIdFromTestName(testName)
+        
+                
+
+
+        curs = self.con.cursor()
+
+        try:
+            curs.execute("DROP VIEW medical_risk")
+        except cx_Oracle.DatabaseError:
+            pass
+        
+        curs.execute("CREATE VIEW medical_risk(medical_type,alarming_age,abnormal_rate) AS \
+SELECT c1.type_id,min(c1.age),ab_rate\
+ FROM  (SELECT   t1.type_id, count(distinct t1.patient_no)/count(distinct t2.patient_no) ab_rate\
+      FROM     test_record t1, test_record t2\
+      WHERE    t1.result <> 'normal' AND t1.type_id = t2.type_id\
+      GROUP BY t1.type_id\
+      ) r,\
+     (SELECT   t1.type_id,age,COUNT(distinct p1.health_care_no) AS ab_cnt\
+      FROM     patient p1,test_record t1,\
+               (SELECT DISTINCT trunc(months_between(sysdate,p1.birth_day)/12) AS age FROM patient p1) \
+      WHERE    trunc(months_between(sysdate,p1.birth_day)/12)>=age\
+               AND p1.health_care_no=t1.patient_no\
+               AND t1.result<>'normal'\
+      GROUP BY age,t1.type_id\
+      ) c1, \
+      (SELECT  t1.type_id,age,COUNT(distinct p1.health_care_no) AS cnt\
+       FROM    patient p1, test_record t1,\
+      	       (SELECT DISTINCT trunc(months_between(sysdate,p1.birth_day)/12) AS age FROM patient p1)\
+       WHERE trunc(months_between(sysdate,p1.birth_day)/12)>=age\
+             AND p1.health_care_no=t1.patient_no\
+       GROUP BY age,t1.type_id\
+      ) c2\
+ WHERE  c1.age = c2.age AND c1.type_id = c2.type_id AND c1.type_id = r.type_id \
+       AND c1.ab_cnt/c2.cnt>=2*r.ab_rate\
+ GROUP BY c1.type_id,ab_rate")
+
+        curs.execute("SELECT DISTINCT name, address, phone\
+  FROM   patient p, medical_risk m\
+  WHERE  trunc(months_between(sysdate,birth_day)/12) >= m.alarming_age \
+  AND m.medical_type = " + str(typeId) + "\
+  AND       p.health_care_no NOT IN (SELECT patient_no\
+                                FROM   test_record t\
+                                WHERE  m.medical_type = t.type_id\
+                                AND t.result IS NOT NULL\
+                               )")
+
+        rows = curs.fetchall()
+
+        print("\nPatients who are above the alarming age and have not been tested:")
+        for row in rows:
+            print(row)
+        
+
+        
+    def getTestName(self):
+    
+        curs = self.con.cursor()
+        curs.execute('select test_name from test_type')
+        rows = curs.fetchall()
+        for row in rows:
+            print(row)
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+        string = input('Enter test name: ')
+        if self.isReal(string,"T"):
+            return string,False 
+        else:
+            print("Not a real test, please try again")
+            return False, True
+
+
+
+
+    def getTypeIdFromTestName(self, testName):
+        
+        curs = self.con.cursor()
+
+        curs.execute("select type_id from test_type where \
+                      test_name = '" + testName + "'")
+
+        rows = curs.fetchall()
+
+        if len(rows) != 1 :
+            print('Error getting test type id.')
+            return ""
+
+        return rows[0][0]        
             
             
             
@@ -147,9 +209,9 @@ class SearchEngine():
         go=True
         while go:
             if case == "S":
-                date=input("Please enter start prescribe date in format DD/MM/YYYY")
+                date=input("Please enter start prescribe date in format DD/MM/YYYY: ")
             else:
-                date=input("Please enter end prescribe date in format DD/MM/YYYY")
+                date=input("Please enter end prescribe date in format DD/MM/YYYY: ")
             try:
                 int(date[:2])
                 int(date[3:5])
