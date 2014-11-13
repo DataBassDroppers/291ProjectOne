@@ -12,21 +12,16 @@ class Prescription():
                                          credentials[1] + '@gwynne.cs.ualberta.ca:1521/CRS')
         
         
+        while 1:
+            cont = self.getInputs()
+            if cont == 0:
+                return 1 
 
-        cont = self.getInputs()
-        if cont == 0:
-            return 1 
-
-        if self.patientCanTakeTest():
-            self.executeStatement()
-            self.con.close()
-            # return 1 on success
-            return 1
-        else:
-            print("Sorry this patient cannot take this type of test, please try again")
-            self.con.close()
-            self.main()
-            return 1
+            if self.patientCanTakeTest() and self.userConfirmsInputs():
+                    self.executeStatement()
+                    self.con.close()
+                # return 1 on success
+                    return 1
             
 
         
@@ -221,7 +216,27 @@ class Prescription():
                     print("Incorrect value, enter valid ID of correct patient.")
         else:
             return rows[0][0]
-        
+
+
+    def userConfirmsInputs(self):
+        self.printSeparator()
+
+        print("Are the following inputs correct?\n")
+        print("Patient ID: " + str(self.patient))
+        print("Doctor employee number: " + str(self.doctor))
+        print("Test type: " + str(self.testName))
+
+        while 1:
+            tmp = input("Confirm information (y/n): ")
+            if tmp == "y":
+                print("Information confirmed.")
+                return True
+            elif tmp == "n":
+                print("Information not confirmed, please start over.")
+                return False
+            else:
+                print("Invalid choice, pick 'y' or 'n'")
+                
     
     def printSeparator(self):
         print("")
@@ -244,6 +259,7 @@ class Prescription():
         cantTakeTest = curs.fetchall()
 
         if len(cantTakeTest) > 0:
+            print("Sorry this patient cannot take this type of test, please try again")
             return False
 
         return True

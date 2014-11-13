@@ -209,7 +209,7 @@ class Patient_Info_Update():
             print()
             phone = input("Input Patient Phone Number (10-digits): ")
             if phone.isdigit() and len(phone) == 10:		
-                reply = input("Confirm patient name :: " + phone + " :: (y/n): ")
+                reply = input("Confirm patient number :: " + phone + " :: (y/n): ")
                 if reply == "y":
                     ans = False
                 elif reply == "n":		
