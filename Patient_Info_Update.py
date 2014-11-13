@@ -88,7 +88,11 @@ class Patient_Info_Update():
                     self.patient,go = self.getPatient()
                 not_done = True
                 while not_done:
+                    curs = self.con.cursor()
+                    curs.execute("select * from patient where health_care_no=" + str(self.patient))            
+                    rows = curs.fetchall()
                     print()
+                    print("Current Information: " + str(rows[0]))
                     print("[1] Update patient name.")
                     print("[2] Update patient address.")
                     print("[3] Update patient birth date.")
@@ -401,7 +405,6 @@ class Patient_Info_Update():
         
         if self.isNumber(string):
             if self.goodNumber(string,"P"):
-                print("patient health care number is",int(string))
                 return int(string),False
             else:
                 print("Invalid health care number.")
@@ -463,14 +466,38 @@ class Patient_Info_Update():
 
         curs = self.con.cursor()
         if state == 1:
-            curs.execute("insert into patient values (" + str(self.HCN) + ", '" + str(self.name) + "', '" + str(self.address) + "', TO_DATE('" + str(self.birth) + "', 'YYYY-MM-DD'), '" + str(self.phone) + "')")
+            try: 
+                curs.execute("insert into patient values (" + str(self.HCN) + ", '" + str(self.name) + "', '" + str(self.address) + "', TO_DATE('" + str(self.birth) + "', 'YYYY-MM-DD'), '" + str(self.phone) + "')")
+            except:
+                self.printSeparator()
+                print("SQL Database Violation. Remember, Name and Address are a unique key.")
         elif state == 2:
+            if self.name_update and self.address_update:
+                curs.execute("select name, address from patient")
+                rows = curs.fetchall()
+                for row in rows:
+                    if row[0] == self.name and row[1] == self.address:
+                        self.printSeparator()
+                        print("SQL Database Violation. Name and Address are a unique key.")
+                        self.printSeparator()
+                        return 0
             if self.name_update:
-                curs.execute("update patient set name='" + str(self.name) + "' where health_care_no=" + str(self.patient))
+                try:
+                    curs.execute("update patient set name='" + str(self.name) + "' where health_care_no=" + str(self.patient))
+                except:
+                    self.printSeparator()                    
+                    print("SQL Database Violation. Remember, Name and Address are a unique key.")
+                    self.printSeparator()
             if self.address_update:        
-                curs.execute("update patient set address='" + str(self.address) + "' where health_care_no=" + str(self.patient))
+                try: 
+                    curs.execute("update patient set address='" + str(self.address) + "' where health_care_no=" + str(self.patient))
+                except:
+                    self.printSeparator()
+                    print("SQL Database Violation. Remember, Name and Address are a unique key.")
+                    self.printSeparator()
             if self.birth_update:        
-                curs.execute("update patient set birth_day='" + str(self.birth) + "' where health_care_no=" + str(self.patient))       
+                curs.execute("update patient set birth_day=TO_DATE('" + str(self.birth) + "', 'YYYY-MM-DD') where health_care_no=" + str(self.patient))       
+            
             if self.phone_update:          
                 curs.execute("update patient set phone='" + str(self.phone) + "' where health_care_no=" + str(self.patient))
         self.printSeparator()

@@ -66,7 +66,7 @@ class Prescription():
         
         while go:
             self.doctor,go = self.getDoctor()
-       
+            
        
        
         go=True
@@ -81,8 +81,6 @@ class Prescription():
             self.patient,go = self.getPatient()
         self.printSeparator()
  
-        #self.patient= self.getPatient()
-
 
     
     def getDoctor(self):
