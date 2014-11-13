@@ -70,7 +70,7 @@ class Patient_Info_Update():
                 print("Patient Phone Number: " + self.phone)
                 print()
                 while 1: 
-                    conf = input("Confirm information (y/n)")
+                    conf = input("Confirm information (y/n): ")
                     if conf == "y":
                         print("Information confirmed.")
                         return 1
@@ -367,27 +367,6 @@ class Patient_Info_Update():
     def isNumber(self, string):
         return string.isdigit()
     
-	
-    def getTestRecord(self, p_no):
-        curs = self.con.cursor()
-	
-        curs.execute("select * from test_record where patient_no like'"+str(p_no)+"'")
-	
-        rows = curs.fetchall()
-	
-        for row in rows:
-            print(row)
-	
-        print()
-        string = input('Enter Test ID: ')
-	
-        if self.isNumber(string):
-            if self.isReal(string, "R"):
-                print("Test ID selected is", int(string))
-                return int(string), False
-            else:
-                print("Invalid test id.")
-                return False, True
 		
 	
     # returns the patient_no on success

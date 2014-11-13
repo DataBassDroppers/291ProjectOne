@@ -28,56 +28,112 @@ class Medical_Test():
         
         
     def getInputs(self):
-        print()
-        print("[1] Enter Test Result Information.")
-        print("[2] Return to main menu.")
-
-       
         while 1:
-            ans = input("Enter a choice: ")
-            if ans == "1":
-                break
-            elif ans == "2":
-                return 0
-            else:
-                print("Invalid choice.")
+            print()
+            print("[1] Enter Test Result Information.")
+            print("[2] Return to main menu.")
+            
+            while 1:
+                ans = input("Enter a choice: ")
+                if ans == "1":
+                    break
+                elif ans == "2":
+                    return 0
+                else:
+                    print("Invalid choice.")
 
+            go=True
+            self.printSeparator()
+            while go:
+                self.patient,go = self.getPatient()
+                print("Patient ID is " + str(self.patient))
+                while 1:
+                    tmp = input("Confirm information (y/n): ")
+                    if tmp == "y":
+                        print("Information confirmed.")
+                        break
+                    elif tmp == "n":
+                        print("Information not confirmed, repick patient.")
+                        go=True
+                        break
+                    else:
+                        print("Invalid choice, pick 'y' or 'n'")
 
-
-	
-	
-        go=True
-        self.printSeparator()
-        while go:
-            self.patient,go = self.getPatient()
 	    
-        go=True
-        self.printSeparator()
-        while go:
-            self.testId,go = self.getTestRecord(self.patient)	
+            go=True
+            self.printSeparator()
+            while go:
+                self.testId,go = self.getTestRecord(self.patient)	
+                print("Test ID is " + str(self.testId))
+                while 1:
+                    tmp = input("Confirm information (y/n): ")
+                    if tmp == "y":
+                        print("Information confirmed.")
+                        break
+                    elif tmp == "n":
+                        print("Information not confirmed, repick test record.")
+                        go=True
+                        break
+                    else:
+                        print("Invalid choice, pick 'y' or 'n'")
 	
-	
-        go=True
-        self.printSeparator()
-        while go:
-            self.m_lab,go = self.getM_Lab()
+            go=True
+            self.printSeparator()
+            while go:
+                self.m_lab,go = self.getM_Lab()
+                print("Lab name is " + str(self.m_lab))
+                while 1:
+                    tmp = input("Confirm information (y/n): ")
+                    if tmp == "y":
+                        print("Information confirmed.")
+                        break
+                    elif tmp == "n":
+                        print("Information not confirmed, repick lab.")
+                        go=True
+                        break
+                    else:
+                        print("Invalid choice, pick 'y' or 'n'")
        
-        # testDate gets a string of "yyyy,mm,dd"
-        go=True
-        self.printSeparator()
-        while go:
-            self.testDate,go = self.getTestDate()
+            # testDate gets a string of "yyyy,mm,dd"
+            go=True
+            self.printSeparator()
+            while go:
+                self.testDate,go = self.getTestDate()
+                print("Test Date is " + str(self.testDate))
+                while 1:
+                    tmp = input("Confirm information (y/n): ")
+                    if tmp == "y":
+                        print("Information confirmed.")
+                        break
+                    elif tmp == "n":
+                        print("Information not confirmed, re-enter test date.")
+                        go=True
+                        break
+                    else:
+                        print("Invalid choice, pick 'y' or 'n'")
         
-        go=True
-        self.printSeparator()
-        while go:
-            self.testResult,go = self.getTestResult()
+            go=True
+            self.printSeparator()
+            while go:
+                self.testResult,go = self.getTestResult()
     
-        self.printSeparator()
-        
-        return 1
-
-
+            self.printSeparator()
+            print("Medical Lab: " + str(self.m_lab))
+            print("Prescribe Date: " + str(self.testDate))
+            print("Result: " + str(self.testResult))        
+            print()         
+            while 1: 
+                tmp = input("Confirm updates (y/n): ")
+                if tmp == "y":
+                    print("Information confirmed.")
+                    return 1
+                elif tmp == "n":
+                    print("Information not confirmed, returning to start.")
+                    break
+                else:
+                    print("Invalid choice, pick 'y' or 'n'")                
+            
+            
     def getTestResult(self):
         not_allowed = [chr(34), chr(39)]  
         result = input("Enter Result: ")
@@ -98,17 +154,18 @@ class Medical_Test():
         curs.execute('select lab_name from medical_lab m')
 
         rows = curs.fetchall()
+        while 1:
+            print()
+            for row in rows:
+                print(row)
+            print()   
+            string = input('Enter Medical Lab Name: ')
 
-        for row in rows:
-            print(row)
-        string = input('Enter Medical Lab Name: ')
-
-        if self.isReal(string,"L"):
-            print("Lab name is:", string)
-            return string,False
-        else:
-            print("Invalid lab name")
-            return False,True
+            if self.isReal(string,"L"):
+                return string,False
+            else:
+                print("Invalid lab name")
+                
 	
     def getTestDate(self):
         string = input('Enter Test Date "yyyy/mm/dd": ')
@@ -214,21 +271,21 @@ class Medical_Test():
 	
         rows = curs.fetchall()
 	
-        for row in rows:
-            print(row)
-	
-        print()
-        string = input('Enter Test ID: ')
-	
-        if self.isNumber(string):
-            if self.isReal(string, "R"):
-                print("Test ID selected is", int(string))
-                return int(string), False
-            else:
-                print("Invalid test id.")
-                return False, True
-		
-	
+        while 1:
+            print()
+            for row in rows:
+                print(row)
+            print()            
+            string = input('Enter Test ID: ')	
+            if self.isNumber(string):
+                if self.isReal(string, "R"):
+                    return int(string), False
+                else:
+                    print("Invalid test id.")
+            else:	 	
+                print("Invalid input, select a valid test ID.")
+                
+
     # returns the patient_no on success
     def getPatient(self):
         curs = self.con.cursor()
@@ -237,25 +294,24 @@ class Medical_Test():
 
         rows = curs.fetchall()
         
-        for row in rows:
-            print(row)
-        
-        string = input('Enter Patient name or number: ')
-        
-        if self.isNumber(string):
-            if self.goodNumber(string,"P"):
-                print("patient health care number is",int(string))
-                return int(string),False
+        while 1:
+            print()
+            for row in rows:
+                print(row)
+            string = input('Enter Patient name or number: ')
+            print()
+            if self.isNumber(string):
+                if self.goodNumber(string,"P"):
+                    return int(string),False
+                else:
+                    print("Invalid health care number")
+                    print()               
             else:
-                print("Invalid health care number")
-                print()               
-                return False,True
-        else:
-            if self.isReal(string,"P"):
-                return self.getPatientNumber(string),False
-            else:
-                print(string,"is not a real patient, try again")
-                return False,True
+                if self.isReal(string,"P"):
+                    return self.getPatientNumber(string),False
+                else:
+                    print(string,"is not a real patient, try again")
+                
             
     def getPatientNumber(self,string):
         curs = self.con.cursor()
