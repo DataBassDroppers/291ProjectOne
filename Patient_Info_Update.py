@@ -16,15 +16,14 @@ class Patient_Info_Update():
         password = f.readline()[:-1]
         #password = getpass.getpass() # could use this to get password, but doesn't work with IDE
 
-        self.con = cx_Oracle.connect(username + '/' + \
-	                        password + '@gwynne.cs.ualberta.ca:1521/CRS')
+        self.con = cx_Oracle.connect(username + '/' + password + '@gwynne.cs.ualberta.ca:1521/CRS')
 
 	
-        cont = self.getInputs()
-        if cont == 0:
+        state = self.getInputs()
+        if state == 0:
             return 1  
 	    
-        #self.executeStatement()
+        self.executeStatement(state)
         self.con.close()
         return 1	
 	
@@ -175,7 +174,7 @@ class Patient_Info_Update():
                     conf = input("Confirm updates (y/n): ")
                     if conf == "y":
                         print("Information confirmed.")
-                        return 1
+                        return 2
                     elif conf == "n":
                         print("Information not confirmed, returning to start.")
                         break
@@ -261,27 +260,35 @@ class Patient_Info_Update():
                 print("Invalid input, enter again.")
 
     def getBirthDate(self):
-        print()
-        string = input('Enter Birth Date "yyyy/mm/dd": ')
-        if len(string) != 10:
-            print("Invalid input.")
-            return False, True
-        else:
-            year = string[0:4]
-            month = string[5:7]
-            day = string[8:]
-            correctDate = None
-            if self.isNumber(year) and self.isNumber(month) and self.isNumber(day) and string[4] == "/" and string[7] == "/":
-                try:
-                    newDate = datetime.datetime(int(year),int(month),int(day))
-                    correctDate = True
-                except ValueError:
-                    correctDate = False
-            if correctDate:
-                return string,False
-            else:
-                print("Invalid date.")
+        ans = True        
+        while ans:
+            print()
+            string = input('Enter Birth Date "yyyy/mm/dd": ')
+            if len(string) != 10:
+                print("Invalid input.")
                 return False, True
+            else:
+                year = string[0:4]
+                month = string[5:7]
+                day = string[8:]
+                correctDate = None
+                if self.isNumber(year) and self.isNumber(month) and self.isNumber(day) and string[4] == "/" and string[7] == "/":
+                    try:
+                        newDate = datetime.datetime(int(year),int(month),int(day))
+                        correctDate = True
+                    except ValueError:
+                        correctDate = False
+                if correctDate:
+                    reply = input("Confirm patient birth date :: " + string + " :: (y/n): ")
+                    if reply == "y":                        
+                        return string,False
+                    elif reply == "n":
+                        print("Birth date incorrect, enter again.")
+                    else:
+                        print("Invalid input, enter again.")
+                else:
+                    print("Invalid date.")
+                    return False, True
 		
 	
     def goodNumber(self,string,case):
@@ -410,14 +417,24 @@ class Patient_Info_Update():
     def getPatientNumber(self,string):
         curs = self.con.cursor()
 
-        curs.execute("select health_care_no from patient p where p.name like '"+string+"'")
+        curs.execute("select * from patient p where p.name like '"+string+"'")
 
         rows = curs.fetchall()
-        
-        for row in rows:
-            id1=int(row[0])
-        return id1
-
+        tmp = []
+        if len(rows) > 1:
+            while 1:
+                print()
+                print("Health Care Number | Name | Address | Date of Birth | Phone number")
+                for row in rows:
+                    print(row)
+                    tmp.append(str(row[0]))
+                pick = input("Enter ID of correct patient: ")
+                if pick in tmp:
+                    return pick
+                else:
+                    print("Incorrect value, enter valid ID of correct patient.")
+        else:
+            return rows[0][0]
         
     
     def printSeparator(self):
@@ -440,14 +457,22 @@ class Patient_Info_Update():
                 return health_care_no
 
 
-    def executeStatement(self):
+    def executeStatement(self, state):
         print("******EXECUTING STATEMENT******")
 	
 
         curs = self.con.cursor()
-        curs.execute("update test_record set medical_lab='" + str(self.m_lab) + "', result='" + str(self.testResult) + "', test_date=TO_DATE('" + str(self.testDate) + "', 'YYYY-MM-DD') where test_id=" + str(self.testId))
-
-
+        if state == 1:
+            curs.execute("insert into patient values (" + str(self.HCN) + ", '" + str(self.name) + "', '" + str(self.address) + "', TO_DATE('" + str(self.birth) + "', 'YYYY-MM-DD'), '" + str(self.phone) + "')")
+        elif state == 2:
+            if self.name_update:
+                curs.execute("update patient set name='" + str(self.name) + "' where health_care_no=" + str(self.patient))
+            if self.address_update:        
+                curs.execute("update patient set address='" + str(self.address) + "' where health_care_no=" + str(self.patient))
+            if self.birth_update:        
+                curs.execute("update patient set birth_day='" + str(self.birth) + "' where health_care_no=" + str(self.patient))       
+            if self.phone_update:          
+                curs.execute("update patient set phone='" + str(self.phone) + "' where health_care_no=" + str(self.patient))
         self.printSeparator()
         self.con.commit()
         
