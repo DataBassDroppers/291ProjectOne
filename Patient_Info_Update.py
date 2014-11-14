@@ -88,7 +88,19 @@ class Patient_Info_Update():
                     curs.execute("select * from patient where health_care_no=" + str(self.patient))            
                     rows = curs.fetchall()
                     print()
-                    print("Current Information: " + str(rows[0]))
+
+                    for row in rows: 
+                        list1=[]
+                        counter=0
+                        for x in row:       
+                            if counter == 3:
+                                if x is not None: 
+                                    x=(x.strftime("%Y-%m-%d %H:%M:%S"))
+                                    x=x[:-9]
+                            counter+=1
+                            list1.append(x)
+                    
+                    print("Current Information: " + str(tuple(list1)))
                     print("[1] Update patient name.")
                     print("[2] Update patient address.")
                     print("[3] Update patient birth date.")
